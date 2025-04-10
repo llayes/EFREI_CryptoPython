@@ -16,7 +16,7 @@ def hello_world():
 def encryptage(valeur):
     valeur_bytes = valeur.encode()  # str -> bytes
     token = f.encrypt(valeur_bytes)  # Encrypt
-    return f"Valeur encryptée : {token.decode()}"  # bytes -> str
+    return f"Valeur encryptée : {token.decode()}"  # bytes -> str #dd
 
 # 🔓 Route Decrypt : déchiffre un token
 @app.route('/decrypt/<string:token>')
