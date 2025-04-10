@@ -3,30 +3,36 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
-# Clé générée UNE FOIS (fixe)
-key = b'RJ0aaTGn9w5EYIDUkf1ogd81MizG5XoKL5S6Z70PuQA='  # Exemple de clé générée
-f = Fernet(key)
-
+# Page d'accueil
 @app.route('/')
 def hello_world():
     return render_template('hello.html')
 
-# Afficher la clé (bonus)
-@app.route('/key')
-def show_key():
-    return f"Clé utilisée : {key.decode()}"
+# Génération d'une clé Fernet
+@app.route('/generate_key')
+def generate_key():
+    key = Fernet.generate_key()
+    return f"Voici ta clé : {key.decode()}"
 
+# Encrypt avec la clé du serveur (classique)
 @app.route('/encrypt/<string:valeur>')
 def encryptage(valeur):
+    key = Fernet.generate_key()  # Générer une clé unique
+    f = Fernet(key)
     valeur_bytes = valeur.encode()
     token = f.encrypt(valeur_bytes)
-    return f"Valeur encryptée : {token.decode()}"
+    return f"Clé : {key.decode()} | Valeur encryptée : {token.decode()}"
 
-@app.route('/decrypt/<string:token>')
-def decryptage(token):
-    token_bytes = token.encode()
-    valeur = f.decrypt(token_bytes)
-    return f"Valeur décryptée : {valeur.decode()}"
+# Décryptage avec clé + token fournis par l'utilisateur
+@app.route('/decrypt/<string:cle>/<path:token>')
+def decryptage(cle, token):
+    try:
+        f = Fernet(cle.encode())
+        token_bytes = token.encode()
+        valeur = f.decrypt(token_bytes)
+        return f"Valeur décryptée : {valeur.decode()}"
+    except Exception as e:
+        return f"Erreur lors du décryptage : {e}"
 
 if __name__ == "__main__":
     app.run(debug=True)
